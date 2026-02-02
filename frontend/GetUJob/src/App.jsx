@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
-import Home from './components/Home.jsx'
-import JobSeeker from './components/JobSeeker.jsx'
-import ReferralGiver from './components/ReferralGiver.jsx'
+import Home from './pages/Home.jsx'
+import JobSeeker from './pages/JobSeeker.jsx'
+import ReferralGiver from './pages/ReferralGiver.jsx'
 
 function App() {
   return (
