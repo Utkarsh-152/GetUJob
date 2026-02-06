@@ -50,12 +50,20 @@ const registerEmployer = asyncHandler(async (req, res) => {
         ) {
             throw new ApiError(400, "All required fields must be provided")
         }
+
+        console.log("all required fields are provided")
+        
         const existedEmployer = await Employer.findOne({
             $or: [{ email }, { username }]
         })
+
+        console.log("existedEmployer", existedEmployer)
+        
         if(existedEmployer) {
             throw new ApiError(409, "User with Email or Username already exists")
         }
+
+        console.log("user does not exist")
 
         let profilePhotoUrl = null;
         const profilePhotoLocalPath = req.files?.profilePhoto[0]?.path;

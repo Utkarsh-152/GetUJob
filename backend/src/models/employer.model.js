@@ -52,10 +52,10 @@ const employerSchema = new Schema({
     }   
 }, {timestamps: true})
 
-employerSchema.pre("save", async function(next){
-    if(!this.isModified("password")) return next();
-    this.password = await bcrypt.hash(this.password, 10)
-    next()
+employerSchema.pre("save", async function(){
+    if(this.isModified("password")) {
+        this.password = await bcrypt.hash(this.password, 10)
+    }
 })  
 
 employerSchema.methods.isPasswordCorrect = async function(password){
