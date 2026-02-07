@@ -10,216 +10,219 @@ const ReferralGiverRegister = () => {
     companyName: '',
     companyEmail: '',
     companyWebsite: '',
-    profilePhoto: '',
+    profilePhoto: null,
   });
+  
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === 'profilePhoto') {
+      const file = e.target.files[0];
+      if (file) {
+        setFormData({ ...formData, profilePhoto: file });
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Referral Giver Registration Data:', formData);
-    // Add registration logic here
+    const data = new FormData();
+    for (const key in formData) {
+      data.append(key, formData[key]);
+    }
+    console.log('Referral Giver Registration Data (FormData):', data);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
-        
-        {/* Left Side - Info & Aesthetics */}
-        <div className="md:w-5/12 bg-gradient-to-br from-emerald-600 to-teal-700 p-12 text-white flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+    <div className="flex h-screen w-screen overflow-hidden bg-white font-sans">
+      
+      {/* Left Side - Brand (35% width) - Compact content */}
+      <div className="hidden md:flex w-[35%] bg-emerald-900 relative flex-col justify-between p-8 text-white overflow-hidden">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M0 0 L100 0 L100 100 Z" fill="white" />
+                <circle cx="0" cy="0" r="40" fill="white" />
+                <circle cx="100" cy="100" r="50" fill="white" />
             </svg>
-          </div>
-          
-          <div className="relative z-10">
-            <Link to="/" className="inline-flex items-center text-emerald-100 hover:text-white transition-colors mb-12">
-               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-               Back to Home
-            </Link>
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
-              Empower Talent.<br/>Build Your Legacy.
-            </h1>
-            <p className="text-lg text-emerald-100 leading-relaxed">
-              Join a network of top professionals referring the best talent. Help your company grow while earning rewards.
-            </p>
-          </div>
-
-          <div className="relative z-10 mt-12 space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-              </div>
-              <span className="font-medium text-lg">Verify your company status</span>
-            </div>
-            <div className="flex items-center gap-4">
-               <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-               </div>
-               <span className="font-medium text-lg">Track successful hires</span>
-            </div>
-            <div className="flex items-center gap-4">
-               <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-               </div>
-               <span className="font-medium text-lg">Earn referral bonuses</span>
-            </div>
-          </div>
         </div>
 
-        {/* Right Side - Form */}
-        <div className="md:w-7/12 p-8 md:p-12 overflow-y-auto">
-          <div className="max-w-md mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-            <p className="text-gray-500 mb-8">Sign up as a referral giver to get started.</p>
+        <div className="relative z-10">
+           <Link to="/" className="inline-flex items-center text-emerald-200 hover:text-white transition-colors text-sm">
+               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+               Back home
+            </Link>
+            <div className="mt-8">
+                <h1 className="text-3xl lg:text-4xl font-bold leading-tight mb-3">
+                    Elite Network.
+                </h1>
+                <p className="text-base text-emerald-100 font-light opacity-90">
+                    Shape the future of tech hiring.
+                </p>
+            </div>
+        </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                  <input
-                    type="text"
-                    name="fullname"
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none bg-gray-50 focus:bg-white"
-                    placeholder="John Doe"
-                    value={formData.fullname}
-                    onChange={handleChange}
-                  />
+        <div className="relative z-10 space-y-3 text-sm">
+             <div className="flex items-center gap-3 text-emerald-100">
+                <div className="w-6 h-6 rounded-full bg-emerald-800 flex items-center justify-center text-xs">1</div>
+                <span>Create profile</span>
+             </div>
+             <div className="flex items-center gap-3 text-emerald-100">
+                <div className="w-6 h-6 rounded-full bg-emerald-800 flex items-center justify-center text-xs">2</div>
+                <span>Verify credentials</span>
+             </div>
+             <div className="flex items-center gap-3 text-emerald-100">
+                <div className="w-6 h-6 rounded-full bg-emerald-800 flex items-center justify-center text-xs">3</div>
+                <span>Start earning</span>
+             </div>
+        </div>
+      </div>
+
+      {/* Right Side - Form (65%) - Perfectly Centered, No Scroll */}
+      <div className="w-full md:w-[65%] h-full flex flex-col justify-center items-center bg-gray-50 px-4 sm:px-8">
+        <div className="w-full max-w-3xl bg-white md:bg-transparent rounded-2xl shadow-xl md:shadow-none p-6 md:p-0">
+          
+          <div className="flex items-center justify-between mb-6">
+            <div>
+                <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
+                <p className="text-gray-500 text-sm">Referral Giver Registration</p>
+            </div>
+            
+            {/* Compact Profile Picture Upload */}
+            <div className="relative group">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm bg-gray-100 flex items-center justify-center cursor-pointer">
+                    {previewUrl ? (
+                        <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                        <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    )}
                 </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Username</label>
-                  <input
-                    type="text"
-                    name="username"
-                    required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none bg-gray-50 focus:bg-white"
-                    placeholder="johndoe123"
-                    value={formData.username}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Personal Email</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path></svg>
-                  </div>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none bg-gray-50 focus:bg-white"
-                    placeholder="you@example.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                     <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                  </div>
-                  <input
-                    type="password"
-                    name="password"
-                    required
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none bg-gray-50 focus:bg-white"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Company Name</label>
-                  <div className="relative">
-                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                     </div>
-                     <input
-                      type="text"
-                      name="companyName"
-                      required
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none bg-gray-50 focus:bg-white"
-                      placeholder="Acme Corp"
-                      value={formData.companyName}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Company Website <span className="text-gray-400 font-normal">(Optional)</span></label>
-                  <input
-                    type="url"
-                    name="companyWebsite"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none bg-gray-50 focus:bg-white"
-                    placeholder="https://acme.com"
-                    value={formData.companyWebsite}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Company Email</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                     <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                  </div>
-                  <input
-                    type="email"
-                    name="companyEmail"
-                    required
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none bg-gray-50 focus:bg-white"
-                    placeholder="john@acme.com"
-                    value={formData.companyEmail}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Profile Photo URL <span className="text-gray-400 font-normal">(Optional)</span></label>
-                  <input
-                    type="url"
-                    name="profilePhoto"
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none bg-gray-50 focus:bg-white"
-                    placeholder="https://example.com/photo.jpg"
-                    value={formData.profilePhoto}
-                    onChange={handleChange}
-                  />
-              </div>
-
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-emerald-700 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                >
-                  Register as Giver
-                </button>
-              </div>
-
-            </form>
-
-            <p className="text-center mt-6 text-gray-500">
-              Already have an account?{' '}
-              <a href="/login" className="text-emerald-600 font-semibold hover:underline">
-                Log in
-              </a>
-            </p>
+                <label htmlFor="profilePhoto" className="absolute -bottom-1 -right-1 bg-emerald-600 text-white p-1 rounded-full shadow-md cursor-pointer hover:bg-emerald-700 transition-colors">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                </label>
+                <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*" className="hidden" onChange={handleChange} />
+            </div>
           </div>
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            
+            {/* Personal Details Row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Full Name</label>
+                <input
+                  type="text"
+                  name="fullname"
+                  required
+                  className="w-full px-3 py-2 rounded border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-sm transition-all"
+                  placeholder="John Doe"
+                  value={formData.fullname}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Username</label>
+                <input
+                  type="text"
+                  name="username"
+                  required
+                  className="w-full px-3 py-2 rounded border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-sm transition-all"
+                  placeholder="johndoe"
+                  value={formData.username}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Account Details Row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Personal Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  className="w-full px-3 py-2 rounded border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-sm transition-all"
+                  placeholder="you@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  required
+                  className="w-full px-3 py-2 rounded border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-sm transition-all"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 my-2"></div>
+
+            {/* Company Details Row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Company Name</label>
+                <input
+                  type="text"
+                  name="companyName"
+                  required
+                  className="w-full px-3 py-2 rounded border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-sm transition-all"
+                  placeholder="Acme Corp"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="space-y-1">
+                 <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Website</label>
+                 <input
+                  type="url"
+                  name="companyWebsite"
+                  className="w-full px-3 py-2 rounded border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-sm transition-all"
+                  placeholder="acme.com"
+                  value={formData.companyWebsite}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Company Email</label>
+              <input
+                type="email"
+                name="companyEmail"
+                required
+                className="w-full px-3 py-2 rounded border border-gray-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none text-sm transition-all"
+                placeholder="hr@acme.com"
+                value={formData.companyEmail}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="pt-2">
+                <button
+                type="submit"
+                className="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg shadow-md hover:bg-emerald-700 hover:shadow-lg transition-all duration-300 text-sm tracking-wide"
+                  >
+              
+                Register Account
+                </button>
+            </div>
+
+            <p className="text-center text-gray-400 text-xs mt-2">
+              Have an account?{' '}
+              <Link to="/login" className="text-emerald-600 font-semibold hover:underline">
+                Sign in
+              </Link>
+            </p>
+
+          </form>
         </div>
       </div>
     </div>
