@@ -14,7 +14,7 @@ const WMap = () => {
                 className="inline-block"
                 initial={{ x: -10, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: idx * 0.04 }}
+                transition={{ duration: 2, delay: idx * 0.4 }}
               >
                 {word}
               </motion.span>    
