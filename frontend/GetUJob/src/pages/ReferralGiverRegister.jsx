@@ -75,7 +75,7 @@ const ReferralGiverRegister = () => {
 
       data.referralsLeft = Number(formData.referralsLeft);
 
-      await axios.post('http://localhost:8000/api/employer/register', data, {
+      await axios.post('https://getujob.onrender.com/api/employer/register', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
