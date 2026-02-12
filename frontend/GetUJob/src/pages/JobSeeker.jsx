@@ -806,7 +806,7 @@ const JobSeeker = () => {
                 <p className="text-center text-[12px] text-neutral-500">
                   Already have an account?{' '}
                   <Link
-                    to="/login"
+                    to="/loginSeeker"
                     className="font-medium text-emerald-400 hover:text-emerald-300"
                   >
                     Sign in

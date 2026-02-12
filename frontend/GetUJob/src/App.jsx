@@ -4,7 +4,7 @@ import Home from './pages/Home.jsx';
 import JobSeeker from './pages/JobSeeker.jsx';
 import ReferralGiverRegister from './pages/ReferralGiverRegister.jsx';
 import LoginReferralGivers from './pages/LoginReferralGivers.jsx';
-import LoginJobseeker from './pages/LoginJobseeker.jsx';
+import LoginSeeker from './pages/LoginSeeker.jsx';
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
         <Route path="/seeker" element={<JobSeeker />} />
         <Route path="/giver" element={<ReferralGiverRegister />} />
         <Route path="/loginReferralGivers" element={<LoginReferralGivers />} />
-        <Route path="/loginJobseeker" element={<LoginJobseeker />} />
+        <Route path="/loginSeeker" element={<LoginSeeker />} />
       </Routes>
     </Router>
   );
