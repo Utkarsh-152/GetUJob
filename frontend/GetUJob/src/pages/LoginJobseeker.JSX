@@ -1,31 +1,52 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, LogIn } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { User, Lock, ArrowRight, LogIn } from 'lucide-react';
 
-const Login = () => {
+const LoginJobseeker = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const successMessage = location.state?.successMessage;
 
+  // Change only this route when your backend login is ready.
+  const loginUrl = 'http://localhost:8000/api/jobSeeker/login';
+
   const [formData, setFormData] = useState({
-    email: '',
+    identifier: '', // email OR username
     password: '',
   });
 
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
-    // TODO: plug in real login API here when ready
-    setTimeout(() => {
+    try {
+      // Backend can accept identifier and decide email/username.
+      // If your backend expects different keys, change payload here only.
+      await axios.post(loginUrl, {
+        identifier: formData.identifier,
+        password: formData.password,
+      });
+
+      // TODO: store tokens/cookies when backend returns them.
+      navigate('/seeker');
+    } catch (err) {
+      console.error('Job seeker login failed:', err);
+      setError(
+        err.response?.data?.message || 'Login failed. Please check your credentials.'
+      );
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (
@@ -47,9 +68,7 @@ const Login = () => {
           <h1 className="text-3xl md:text-4xl font-bold bg-linear-to-r from-white to-neutral-400 bg-clip-text text-transparent mb-2">
             Welcome back
           </h1>
-          <p className="text-neutral-400">
-            Sign in to access your referral dashboard.
-          </p>
+          <p className="text-neutral-400">Sign in to access your job seeker profile.</p>
         </div>
 
         {successMessage && (
@@ -58,17 +77,23 @@ const Login = () => {
           </div>
         )}
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/40 rounded-xl text-red-300 text-sm text-center">
+            {error}
+          </div>
+        )}
+
         <div className="bg-neutral-900/60 backdrop-blur-xl border border-neutral-800 rounded-3xl p-6 md:p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="relative group">
-                <Mail className="absolute left-4 top-3.5 w-5 h-5 text-neutral-500" />
+                <User className="absolute left-4 top-3.5 w-5 h-5 text-neutral-500" />
                 <input
-                  type="email"
-                  name="email"
+                  type="text"
+                  name="identifier"
                   required
-                  placeholder="Work Email"
-                  value={formData.email}
+                  placeholder="Email or Username"
+                  value={formData.identifier}
                   onChange={handleChange}
                   className="w-full bg-neutral-800/50 border border-neutral-700 rounded-xl px-12 py-3 text-white placeholder:text-neutral-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all group-hover:border-emerald-500"
                 />
@@ -106,10 +131,10 @@ const Login = () => {
             <p className="text-center text-neutral-500 mt-4 text-sm">
               Don&apos;t have an account yet?{' '}
               <Link
-                to="/"
+                to="/seeker"
                 className="text-emerald-500 hover:text-emerald-400 font-medium hover:underline"
               >
-                Back to home page
+                Create job seeker profile
               </Link>
             </p>
           </form>
@@ -119,5 +144,4 @@ const Login = () => {
   );
 };
 
-export default Login;
-
+export default LoginJobseeker;

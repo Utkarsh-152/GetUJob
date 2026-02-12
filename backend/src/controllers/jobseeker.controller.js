@@ -1,19 +1,19 @@
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiError} from "../utils/ApiError.js"
-import {Employer} from "../models/employer.model.js"
+import {JobSeeker} from "../models/JobSeeker.model.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
 
 
-const generateAccessTokenAndRefreshToken = async(employerId) => {
+const generateAccessTokenAndRefreshToken = async(jobSeekerId) => {
     try {
-        const employer = await Employer.findById(employerId)
-        const accessToken = employer.generateAccessToken()
-        const refreshToken = employer.generateRefreshToken()
+        const jobSeeker = await JobSeeker.findById(jobSeekerId)
+        const accessToken = jobSeeker.generateAccessToken()
+        const refreshToken = jobSeeker.generateRefreshToken()
         
-        employer.refreshToken = refreshToken
-        await employer.save({ValidateBeforeSave: false})
+        jobSeeker.refreshToken = refreshToken
+        await jobSeeker.save({ValidateBeforeSave: false})
 
         return {accessToken, refreshToken}
 
@@ -24,7 +24,7 @@ const generateAccessTokenAndRefreshToken = async(employerId) => {
 
 
 
-const registerEmployer = asyncHandler(async (req, res) => {
+const registerJobSeeker = asyncHandler(async (req, res) => {
 
         console.log("req.body", req.body)
 
@@ -33,10 +33,12 @@ const registerEmployer = asyncHandler(async (req, res) => {
             email,
             username,
             password,
-            companyName,
-            referralsLeft,
-            companyEmail,
-            companyWebsite
+            experience,
+            education,
+            skills,
+            projects,
+            certifications,
+            resume
         } = req.body
         
         if ([
@@ -44,8 +46,6 @@ const registerEmployer = asyncHandler(async (req, res) => {
             email,
             username,
             password,
-            companyName,
-            companyEmail
         ].some((field)=> field?.trim()==="")
         ) {
             throw new ApiError(400, "All required fields must be provided")
@@ -53,13 +53,13 @@ const registerEmployer = asyncHandler(async (req, res) => {
 
         console.log("all required fields are provided")
         
-        const existedEmployer = await Employer.findOne({
+        const existedJobSeeker = await JobSeeker.findOne({
             $or: [{ email }, { username }]
         })
 
-        console.log("existedEmployer", existedEmployer)
+        console.log("existedJobSeeker", existedJobSeeker)
         
-        if(existedEmployer) {
+        if(existedJobSeeker) {
             throw new ApiError(409, "User with Email or Username already exists")
         }
 
@@ -74,33 +74,33 @@ const registerEmployer = asyncHandler(async (req, res) => {
 
         console.log("profilePhotoUrl", profilePhotoUrl)
 
-        const employer = await Employer.create({
+        const jobSeeker = await JobSeeker.create({
             fullname,
             profilePhoto: profilePhotoUrl?.url,
-            companyName,
-            referralsLeft,
-            companyEmail,
-            companyWebsite,
             username: username.toLowerCase(),
             email,
-            password
+            password,
+            experience,
+            education,
+            skills,
+            projects,
+            certifications,
+            resume
         })
 
-        console.log("employer", employer)
-        
-        const createdEmployer = await Employer.findById(employer._id).select("-password -refreshToken")
+        console.log("jobSeeker", jobSeeker)
 
-        console.log("createdEmployer", createdEmployer)
+        const createdJobSeeker = await JobSeeker.findById(jobSeeker._id).select("-password -refreshToken")
 
-        if(!createdEmployer) {
-            throw new ApiError(500, "Something went wrong while registering the employer")
+        console.log("createdJobSeeker", createdJobSeeker)
+
+        if(!createdJobSeeker) {
+            throw new ApiError(500, "Something went wrong while registering the job seeker")
         }
 
-    return res.status(201).json(
-        new ApiResponse(200, createdEmployer, "Employer created successfully")
+        return res.status(201).json(
+        new ApiResponse(200, createdJobSeeker, "Job Seeker created successfully")
     )
 })
 
-
-
-export {registerEmployer}
+export {registerJobSeeker}

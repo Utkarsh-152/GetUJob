@@ -14,9 +14,10 @@ app.use(cookieParser())
 
 // routes import
 import employerRouter from './routes/employer.routes.js'
+import jobSeekerRouter from './routes/jobSeeker.routes.js'
 
 // routes declaration
 app.use("/api/employer", employerRouter)
-
+app.use("/api/jobSeeker", jobSeekerRouter)
 
 export  {app}
