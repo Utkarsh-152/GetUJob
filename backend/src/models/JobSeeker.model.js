@@ -62,6 +62,17 @@ const jobSeekerSchema = new Schema({
     },
 }, {timestamps: true})
 
+jobSeekerSchema.pre("save", async function(){
+    if(this.isModified("password")) {
+        this.password = await bcrypt.hash(this.password, 10)
+    }
+})  
+
+jobSeekerSchema.methods.isPasswordCorrect = async function(password){
+    return await bcrypt.compare(password, this.password)
+}
+
+
 jobSeekerSchema.methods.generateAccessToken = function(){
     return jwt.sign(
         {
