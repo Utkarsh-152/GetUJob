@@ -1,28 +1,43 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, LogIn } from 'lucide-react';
+import axios from 'axios';
 
 const LoginReferralGivers = () => {
-  const location = useLocation();
   const successMessage = location.state?.successMessage;
-
+  const navigate = useNavigate();
+  
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
   const [loading, setLoading] = useState(false);
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
-    // TODO: plug in real login API here when ready
+    setLoading(true);
+    
+    const data = {
+      email: formData.email,
+      password: formData.password,
+    };
+    
+    await axios.post('http://localhost:8000/api/employer/login', data);
+        
+    navigate('/dashboardEmployers', {
+      state: {
+        successMessage: 'You are logged in',
+      },
+    });
+
     setTimeout(() => {
       setLoading(false);
     }, 800);
@@ -67,7 +82,7 @@ const LoginReferralGivers = () => {
                   type="email"
                   name="email"
                   required
-                  placeholder="Work Email"
+                  placeholder="Email"
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full bg-neutral-800/50 border border-neutral-700 rounded-xl px-12 py-3 text-white placeholder:text-neutral-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all group-hover:border-emerald-500"

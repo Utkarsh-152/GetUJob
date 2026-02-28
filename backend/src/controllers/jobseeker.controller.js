@@ -103,4 +103,54 @@ const registerJobSeeker = asyncHandler(async (req, res) => {
     )
 })
 
-export {registerJobSeeker}
+const loginJobSeeker = asyncHandler(async (req, res) => {
+    // get user details from frontend
+    const {email, password} = req.body
+    
+    // username or email
+    if(!email) {
+        throw new ApiError(400, "Email is required")
+    }
+
+    // find the user in db
+    const user = await JobSeeker.findOne({
+        $or: [{ email }]
+    })
+
+    if (!user) {
+        throw new ApiError(401, "User not found")
+    }
+    
+    // if user found then check for password
+    const isPassValid = await user.isPasswordCorrect(password)
+
+    if (!isPassValid) {
+        throw new ApiError(401, "Invalid password")
+    }
+
+    // access and refresh token generation
+    const {accessToken, refreshToken} = await generateAccessTokenAndRefreshToken(user._id)
+
+    // send them in cookies
+    const loggedInUser = await JobSeeker.findById(user._id).select("-password -refreshToken")
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    // return user response
+    return res.status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", accessToken, options)
+        .json( new ApiResponse(
+            200, 
+            {
+                user: loggedInUser, accessToken, refreshToken
+            },
+            "User logged in successfully"
+        ))
+
+})
+
+export {registerJobSeeker, loginJobSeeker}

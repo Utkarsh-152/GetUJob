@@ -82,7 +82,7 @@ const ReferralGiverRegister = () => {
       });
 
       // On success, send user to login with a success message
-      navigate('/login', {
+      navigate('/loginReferralGivers', {
         state: {
           successMessage: 'Your account is created. Please log in.',
         },

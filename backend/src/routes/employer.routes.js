@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { registerEmployer    } from "../controllers/employer.controller.js";
+import { registerEmployer, loginEmployer   } from "../controllers/employer.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
+
 
 const router = Router()
 
@@ -10,5 +11,7 @@ router.route("/register").post(upload.fields([
         maxCount: 1
     }
 ]),registerEmployer)
+
+router.route("/login").post(loginEmployer)
 
 export default router
