@@ -1,156 +1,83 @@
-import {asyncHandler} from "../utils/asyncHandler.js"
-import {ApiError} from "../utils/ApiError.js"
-import {JobSeeker} from "../models/JobSeeker.model.js"
-import {uploadOnCloudinary} from "../utils/cloudinary.js"
-import { ApiResponse } from "../utils/ApiResponse.js"
-import jwt from "jsonwebtoken"
-
-
-const generateAccessTokenAndRefreshToken = async(jobSeekerId) => {
-    try {
-        const jobSeeker = await JobSeeker.findById(jobSeekerId)
-        const accessToken = jobSeeker.generateAccessToken()
-        const refreshToken = jobSeeker.generateRefreshToken()
-        
-        jobSeeker.refreshToken = refreshToken
-        await jobSeeker.save({ValidateBeforeSave: false})
-
-        return {accessToken, refreshToken}
-
-    } catch (error) {
-        throw new ApiError(500, "something went wrong while generating access token and refresh token")
-    }
-}
-
-
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import supabase from "../db/index.js";
+import {
+  registerUserInDb,
+  resolveLoginIdentifier,
+  assertUserRoleAndPassword,
+  normalizeUserString,
+} from "../services/registerUser.service.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateToken.js";
 
 const registerJobSeeker = asyncHandler(async (req, res) => {
+  const created = await registerUserInDb(supabase, req.body, "jobseeker");
 
-        console.log("req.body", req.body)
-
-        const {
-            fullname,
-            email,
-            username,
-            password,
-            experience,
-            education,
-            skills,
-            projects,
-            certifications,
-            resume
-        } = req.body
-        
-        if ([
-            fullname,
-            email,
-            username,
-            password,
-        ].some((field)=> field?.trim()==="")
-        ) {
-            throw new ApiError(400, "All required fields must be provided")
-        }
-
-        console.log("all required fields are provided")
-        
-        const existedJobSeeker = await JobSeeker.findOne({
-            $or: [{ email }, { username }]
-        })
-
-        console.log("existedJobSeeker", existedJobSeeker)
-        
-        if(existedJobSeeker) {
-            throw new ApiError(409, "User with Email or Username already exists")
-        }
-
-        console.log("user does not exist")
-
-        let profilePhotoUrl = null;
-        const profilePhotoLocalPath = req.files?.profilePhoto[0]?.path;
-
-        if (profilePhotoLocalPath) {
-            profilePhotoUrl = await uploadOnCloudinary(profilePhotoLocalPath);
-        }
-
-        console.log("profilePhotoUrl", profilePhotoUrl)
-
-        const jobSeeker = await JobSeeker.create({
-            fullname,
-            profilePhoto: profilePhotoUrl?.url,
-            username: username.toLowerCase(),
-            email,
-            password,
-            experience,
-            education,
-            skills,
-            projects,
-            certifications,
-            resume
-        })
-
-        console.log("jobSeeker", jobSeeker)
-
-        const createdJobSeeker = await JobSeeker.findById(jobSeeker._id).select("-password -refreshToken")
-
-        console.log("createdJobSeeker", createdJobSeeker)
-
-        if(!createdJobSeeker) {
-            throw new ApiError(500, "Something went wrong while registering the job seeker")
-        }
-
-        return res.status(201).json(
-        new ApiResponse(200, createdJobSeeker, "Job Seeker created successfully")
-    )
-})
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(201, { user: created }, "Job seeker registered successfully")
+    );
+});
 
 const loginJobSeeker = asyncHandler(async (req, res) => {
-    // get user details from frontend
-    const {email, password} = req.body
-    
-    // username or email
-    if(!email) {
-        throw new ApiError(400, "Email is required")
-    }
+  const password = normalizeUserString(req.body?.password);
+  const id = resolveLoginIdentifier(req.body);
 
-    // find the user in db
-    const user = await JobSeeker.findOne({
-        $or: [{ email }]
-    })
+  if (!id) {
+    throw new ApiError(400, "email or phone is required for login");
+  }
+  if (!password) throw new ApiError(400, "password is required");
 
-    if (!user) {
-        throw new ApiError(401, "User not found")
-    }
-    
-    // if user found then check for password
-    const isPassValid = await user.isPasswordCorrect(password)
+  const user = await assertUserRoleAndPassword(supabase, {
+    field: id.field,
+    value: id.value,
+    password,
+    role: "jobseeker",
+  });
 
-    if (!isPassValid) {
-        throw new ApiError(401, "Invalid password")
-    }
+  const accessToken = generateAccessToken({ sub: user.id, role: "jobseeker" });
+  const refreshToken = generateRefreshToken({ sub: user.id, role: "jobseeker" });
 
-    // access and refresh token generation
-    const {accessToken, refreshToken} = await generateAccessTokenAndRefreshToken(user._id)
+  const { data: jobseeker, error: jobseekerError } = await supabase
+    .from("jobseekers")
+    .select(
+      "id,user_id,fullname,profile_photo,email_verified,phone_verified,resume,referrals_matched,created_at,updated_at"
+    )
+    .eq("user_id", user.id)
+    .maybeSingle();
 
-    // send them in cookies
-    const loggedInUser = await JobSeeker.findById(user._id).select("-password -refreshToken")
+  if (jobseekerError) throw new ApiError(500, jobseekerError.message);
 
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  };
 
-    // return user response
-    return res.status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", accessToken, options)
-        .json( new ApiResponse(
-            200, 
-            {
-                user: loggedInUser, accessToken, refreshToken
-            },
-            "User logged in successfully"
-        ))
+  const publicUser = {
+    id: user.id,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+    email_verified: user.email_verified,
+    phone_verified: user.phone_verified,
+  };
 
-})
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(
+      new ApiResponse(
+        200,
+        { user: publicUser, jobseeker, accessToken, refreshToken },
+        "Job seeker logged in successfully"
+      )
+    );
+});
 
-export {registerJobSeeker, loginJobSeeker}
+export { registerJobSeeker, loginJobSeeker };

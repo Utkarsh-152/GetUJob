@@ -1,17 +1,21 @@
-import mongoose from "mongoose";
-import { DB_NAME } from "../constants.js";
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
 
+dotenv.config({
+  path: ".env",
+});
 
-const connectDB = async () => {
-    try {
-        console.log("db connecting to mongodb")
-        const connectionInstance =  await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
-        console.log(`\n MongoDB connected !! DB HOST:  ${connectionInstance.connection.host}`);
-    } catch(error) {
-        console.log("MongoDB connection failed: ", error);
-        process.exit(1)
-    }
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
+if (!supabaseUrl || !supabaseKey) {
+  // Keep the crash early + obvious in dev.
+  throw new Error(
+    "Missing SUPABASE_URL or SUPABASE_*_KEY in environment variables"
+  );
 }
 
-export default connectDB;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+export default supabase;
